@@ -5,7 +5,7 @@ import db from "@/lib/prisma";
 import type { User } from "@prisma/client";
 import { auth } from "@clerk/nextjs/server";
 
-export async function updateUser(data: User) {
+export async function updateUser(data: Partial<User>) {
   const { userId } = await auth();
   if (!userId) throw new Error("unauthorized");
 
@@ -56,6 +56,7 @@ export async function updateUser(data: User) {
     throw new Error("failed to update profile");
   }
 }
+export type updateUserType = typeof updateUser;
 
 export async function getUserOnboardingStatus() {
   const { userId } = await auth();

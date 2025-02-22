@@ -1,5 +1,6 @@
 "use client";
 
+import { updateUser } from "@/actions/user";
 import { onboardingSchema } from "@/app/lib/schema";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,9 +22,11 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { industries } from "@/data/industries";
+import useFetch from "@/hooks/use-fetch";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FieldValues, useForm } from "react-hook-form";
 type IndustryType = (typeof industries)[number];
 interface OnboardingProps {
@@ -34,6 +37,13 @@ const OnboardingFrom = ({ industries }: OnboardingProps) => {
     IndustryType | null | undefined
   >(null);
   const router = useRouter();
+
+  const {
+    loading: updateLoading,
+    fn: updateUserFn,
+    data: updateResult,
+  } = useFetch(updateUser);
+
   const {
     register,
     handleSubmit,
@@ -41,10 +51,32 @@ const OnboardingFrom = ({ industries }: OnboardingProps) => {
     setValue,
     watch,
   } = useForm({ resolver: zodResolver(onboardingSchema) });
-  const watchIndustry = watch("industry");
+
   const onSubmit = async (values: FieldValues) => {
     console.log(values);
+
+    try {
+      const formattedIndustry = `${values.industry}-${values.subIndustry
+        .toLowerCase()
+        .replace(/ /g, "-")}`;
+      await updateUserFn({
+        ...values,
+        industry: formattedIndustry,
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
+
+  useEffect(() => {
+    if (updateResult?.success && !updateLoading) {
+      router.push("/dashboard");
+      router.refresh();
+      //? TODO:
+    }
+  }, [updateResult, updateLoading]);
+
+  const watchIndustry = watch("industry");
   return (
     <div className="flex justify-center items-center bg-background">
       <Card className="w-full max-w-lg mt-10 mx-2">
@@ -89,7 +121,11 @@ const OnboardingFrom = ({ industries }: OnboardingProps) => {
                   })}
                 </SelectContent>
               </Select>
-              {errors.industry && <p>{String(errors.industry.message)}</p>}
+              {errors.industry && (
+                <p className="text-sm text-red-400">
+                  {String(errors.industry.message)}
+                </p>
+              )}
             </div>
             {watchIndustry && (
               <div className="space-y-2">
@@ -116,7 +152,9 @@ const OnboardingFrom = ({ industries }: OnboardingProps) => {
                   </SelectContent>
                 </Select>
                 {errors.subIndustry && (
-                  <p>{String(errors.subIndustry.message)}</p>
+                  <p className="text-sm text-red-400">
+                    {String(errors.subIndustry.message)}
+                  </p>
                 )}
               </div>
             )}
@@ -130,7 +168,11 @@ const OnboardingFrom = ({ industries }: OnboardingProps) => {
                 placeholder="Enter years of experience"
                 {...register("experience")}
               />
-              {errors.experience && <p>{String(errors.experience.message)}</p>}
+              {errors.experience && (
+                <p className="text-sm text-red-400">
+                  {String(errors.experience.message)}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="skills">Skills</Label>
@@ -142,7 +184,11 @@ const OnboardingFrom = ({ industries }: OnboardingProps) => {
               <p className="text-sm text-muted-foreground">
                 Separate multiple skills using commas
               </p>
-              {errors.skills && <p>{String(errors.skills.message)}</p>}
+              {errors.skills && (
+                <p className="text-sm text-red-400">
+                  {String(errors.skills.message)}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="bio">Professional bio</Label>
@@ -155,13 +201,24 @@ const OnboardingFrom = ({ industries }: OnboardingProps) => {
               <p className="text-sm text-muted-foreground">
                 Separate multiple bio using commas
               </p>
-              {errors.bio && <p>{String(errors.bio.message)}</p>}
+              {errors.bio && (
+                <p className="text-sm text-red-400">
+                  {String(errors.bio.message)}
+                </p>
+              )}
             </div>
             <Button
               type="submit"
               className="w-full"
+              disabled={updateLoading}
             >
-              Complete profile
+              {updateLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                </>
+              ) : (
+                "Complete profile"
+              )}
             </Button>
           </form>
         </CardContent>
