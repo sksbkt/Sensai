@@ -5,17 +5,19 @@ import { User } from "@prisma/client";
 import { useState } from "react";
 import { toast } from "sonner";
 
-const useFetch = (cb: typeof updateUser) => {
-  const [data, setData] = useState<any | undefined>(undefined);
+const useFetch = <T>(cb: (...args: any[]) => Promise<T>) => {
+  const [data, setData] = useState<T | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<null | string>(null);
 
-  const fn = async (...args: Parameters<typeof updateUser>) => {
+  const fn = async (...args: Parameters<typeof cb>) => {
+    console.log("ARGS::", ...args);
+
     setLoading(true);
     setError(null);
     try {
       const response = await cb(...args);
-      setData(response);
+      if (response) setData(response);
     } catch (error: unknown) {
       if (error instanceof Error) {
         setError(error.message);

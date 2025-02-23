@@ -53,8 +53,6 @@ const OnboardingFrom = ({ industries }: OnboardingProps) => {
   } = useForm({ resolver: zodResolver(onboardingSchema) });
 
   const onSubmit = async (values: FieldValues) => {
-    console.log(values);
-
     try {
       const formattedIndustry = `${values.industry}-${values.subIndustry
         .toLowerCase()
@@ -69,12 +67,11 @@ const OnboardingFrom = ({ industries }: OnboardingProps) => {
   };
 
   useEffect(() => {
-    if (updateResult?.success && !updateLoading) {
+    if (updateResult && !updateLoading) {
       router.push("/dashboard");
       router.refresh();
-      //? TODO:
     }
-  }, [updateResult, updateLoading]);
+  }, [updateResult, updateLoading, router]);
 
   const watchIndustry = watch("industry");
   return (
