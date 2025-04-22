@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { updateUser } from "@/actions/user";
-import { User } from "@prisma/client";
+
 import { useState } from "react";
 import { toast } from "sonner";
 

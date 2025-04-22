@@ -28,6 +28,7 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { FieldValues, useForm } from "react-hook-form";
+import { toast } from "sonner";
 type IndustryType = (typeof industries)[number];
 interface OnboardingProps {
   industries: IndustryType[];
@@ -68,6 +69,7 @@ const OnboardingFrom = ({ industries }: OnboardingProps) => {
 
   useEffect(() => {
     if (updateResult && !updateLoading) {
+      toast.success("Profile update completed successfully");
       router.push("/dashboard");
       router.refresh();
     }
