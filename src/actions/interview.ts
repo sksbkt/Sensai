@@ -4,7 +4,6 @@ import db from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { JsonValue } from "@prisma/client/runtime/library";
 if (!process.env.GEMINI_API_KEY) {
   throw new Error("GEMINI_API_KEY is not defined in the environment variables");
 }
