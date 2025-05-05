@@ -4,6 +4,7 @@ import db from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { JsonValue } from "@prisma/client/runtime/library";
 if (!process.env.GEMINI_API_KEY) {
   throw new Error("GEMINI_API_KEY is not defined in the environment variables");
 }
@@ -116,5 +117,28 @@ export async function saveQuizResult(
   } catch (error) {
     console.error("Failed to save quiz result:", error);
     throw new Error("Failed to save quiz result");
+  }
+}
+
+export async function getAssessments() {
+  const { userId } = await auth();
+  if (!userId) throw new Error("unauthorized");
+
+  const user = await db.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+  if (!user) throw new Error("User not found");
+  try {
+    const assessments = await db.assessment.findMany({
+      where: { userId: user.id },
+      //? change ascending to descending to get the latest assessments first
+      orderBy: { createdAt: "desc" },
+    });
+    return assessments;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.log("Error fetching assessments", error.message);
+      throw new Error("Failed to fetch assessments");
+    }
   }
 }

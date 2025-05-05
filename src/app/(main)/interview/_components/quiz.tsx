@@ -192,7 +192,7 @@ const Quiz = () => {
             //   color={"gray"}
             // />
             <Loader2
-              className="mt-4"
+              // className="mt-4"
               width={"100%"}
               color={"gray"}
             />
