@@ -71,8 +71,6 @@ const EntryForm = ({ type, entries, onChange }: EntryFormProps) => {
   }, [improvedContent, improveError, isImproving, setValue]);
 
   const handleAdd = handleValidation((data) => {
-    console.log("HERE");
-
     const formateEntry = {
       ...data,
       startDate: formateDisplayDate(data.startDate),

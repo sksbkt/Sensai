@@ -3,7 +3,7 @@
 import db from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { Resume } from "@prisma/client";
+// import { Resume } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 if (!process.env.GEMINI_API_KEY) {
@@ -20,14 +20,16 @@ const getLoggedInUser = async () => {
   return user;
 };
 
-export async function saveResume(content: Omit<Resume, "userId">) {
+export async function saveResume(content: string) {
   const user = await getLoggedInUser();
   try {
+    console.log({ userID: user.id, content: content });
     const resume = await db.resume.upsert({
       where: { userId: user.id },
-      update: { ...content },
-      create: { userId: user.id, ...content },
+      update: { content },
+      create: { userId: user.id, content },
     });
+
     revalidatePath("/resume");
     return resume;
   } catch (error) {
@@ -45,6 +47,7 @@ export async function getResume() {
     const resume = await db.resume.findUnique({
       where: { userId: user.id },
     });
+
     return resume;
   } catch (error) {
     console.error("Failed to get resume:", error);

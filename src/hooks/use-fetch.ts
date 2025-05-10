@@ -10,8 +10,6 @@ const useFetch = <T>(cb: (...args: any[]) => Promise<T>) => {
   const [error, setError] = useState<null | string>(null);
 
   const fn = async (...args: Parameters<typeof cb>) => {
-    console.log("ARGS::", ...args);
-
     setLoading(true);
     setError(null);
     try {
