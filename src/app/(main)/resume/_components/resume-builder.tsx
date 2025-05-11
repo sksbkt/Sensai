@@ -36,6 +36,11 @@ const ResumeBuilder = ({ initialContent }: ResumeBuilderProps) => {
   );
   const { user } = useUser();
   const [isGenerating, setIsGenerating] = useState(false);
+  useEffect(() => {
+    console.log("initial content", initialContent);
+
+    return () => {};
+  }, []);
 
   const {
     control,
@@ -106,6 +111,8 @@ const ResumeBuilder = ({ initialContent }: ResumeBuilderProps) => {
 
   const onSubmit = async (data: unknown) => {
     try {
+      console.log("data", data);
+
       await saveResumeFn(previewContent);
     } catch (error) {
       console.error("Error saving resume:", error);
@@ -148,8 +155,10 @@ const ResumeBuilder = ({ initialContent }: ResumeBuilderProps) => {
         </h1>
         <div className="space-x-2">
           <Button
+            type="submit"
+            form="resume-form"
             variant={"destructive"}
-            onClick={onSubmit}
+            // onClick={onSubmit}
             disabled={isSaving}
           >
             {isSaving ? (
@@ -192,8 +201,12 @@ const ResumeBuilder = ({ initialContent }: ResumeBuilderProps) => {
         </TabsList>
         <TabsContent value="edit">
           <form
+            id="resume-form"
             className="space-y-4"
-            // onSubmit={handleSubmit(onSubmit)}
+            // onSubmit={() => {
+            //   console.log("SUBMIT");
+            // }}
+            onSubmit={handleSubmit(onSubmit)}
           >
             <div>
               <h3 className="text-lg font-medium"> Contact Information</h3>
