@@ -1,7 +1,7 @@
 "use server";
 
+import { getLoggedInUser } from "@/lib/auth";
 import db from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 // import { Resume } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -12,16 +12,8 @@ if (!process.env.GEMINI_API_KEY) {
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-const getLoggedInUser = async () => {
-  const { userId } = await auth();
-  if (!userId) throw new Error("unauthorized");
-  const user = await db.user.findUnique({ where: { clerkUserId: userId } });
-  if (!user) throw new Error("User not found");
-  return user;
-};
-
 export async function saveResume(content: string) {
-  const user = await getLoggedInUser();
+  const { user } = await getLoggedInUser();
   try {
     console.log({ userID: user.id, content: content });
     const resume = await db.resume.upsert({
@@ -39,10 +31,7 @@ export async function saveResume(content: string) {
 }
 
 export async function getResume() {
-  const { userId } = await auth();
-  if (!userId) throw new Error("unauthorized");
-  const user = await db.user.findUnique({ where: { clerkUserId: userId } });
-  if (!user) throw new Error("User not found");
+  const { user } = await getLoggedInUser();
   try {
     const resume = await db.resume.findUnique({
       where: { userId: user.id },
@@ -56,7 +45,7 @@ export async function getResume() {
 }
 
 export async function improveWithAi(current: string, type: string) {
-  const user = await getLoggedInUser();
+  const { user } = await getLoggedInUser();
 
   const prompt = `
     As an expert resume writer, improve the following ${type} description for a ${user.industry} professional.

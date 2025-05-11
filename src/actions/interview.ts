@@ -1,7 +1,7 @@
 "use server";
 
+import { getLoggedInUser } from "@/lib/auth";
 import db from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 if (!process.env.GEMINI_API_KEY) {
@@ -11,13 +11,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export async function generateQuiz() {
-  const { userId } = await auth();
-  if (!userId) throw new Error("unauthorized");
-
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-  if (!user) throw new Error("User not found");
+  const { user } = await getLoggedInUser();
   try {
     const prompt = `
         Generate 10 technical interview questions for a ${
@@ -59,13 +53,7 @@ export async function saveQuizResult(
   answers: string[],
   score: number
 ) {
-  const { userId } = await auth();
-  if (!userId) throw new Error("unauthorized");
-
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-  if (!user) throw new Error("User not found");
+  const { user } = await getLoggedInUser();
 
   const questionResults = questions.map((q, index) => ({
     question: q.question,
@@ -120,13 +108,7 @@ export async function saveQuizResult(
 }
 
 export async function getAssessments() {
-  const { userId } = await auth();
-  if (!userId) throw new Error("unauthorized");
-
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-  if (!user) throw new Error("User not found");
+  const { user } = await getLoggedInUser();
   try {
     const assessments = await db.assessment.findMany({
       where: { userId: user.id },

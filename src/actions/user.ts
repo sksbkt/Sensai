@@ -5,15 +5,11 @@ import db from "@/lib/prisma";
 import type { User } from "@prisma/client";
 import { auth } from "@clerk/nextjs/server";
 import { generateAIInsights } from "@/actions/dashboard";
+import { getLoggedInUser } from "@/lib/auth";
 
 export async function updateUser(data: Partial<User>) {
-  const { userId } = await auth();
-  if (!userId) throw new Error("unauthorized");
+  const { user } = await getLoggedInUser();
 
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-  if (!user) throw new Error("User not found");
   try {
     const result = await db.$transaction(
       async (tx) => {
@@ -68,13 +64,8 @@ export async function updateUser(data: Partial<User>) {
 export type updateUserType = typeof updateUser;
 
 export async function getUserOnboardingStatus() {
-  const { userId } = await auth();
-  if (!userId) throw new Error("unauthorized");
+  const { userId } = await getLoggedInUser();
 
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-  if (!user) throw new Error("User not found");
   try {
     const user = await db.user.findUnique({
       where: { clerkUserId: userId },

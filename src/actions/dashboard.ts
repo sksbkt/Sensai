@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use server";
+import { getLoggedInUser } from "@/lib/auth";
 import db from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -37,14 +38,8 @@ export const generateAIInsights = async (industry: string | null) => {
   return JSON.parse(cleanText);
 };
 export async function getIndustryInsights() {
-  const { userId } = await auth();
-  if (!userId) throw new Error("unauthorized");
+  const { user } = await getLoggedInUser();
 
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-    include: { industryInsight: true },
-  });
-  if (!user) throw new Error("User not found");
   //    TODO:
   if (!user.industryInsight) {
     const insights = await generateAIInsights(user.industry);
